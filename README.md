@@ -1,6 +1,6 @@
 # qa-for-me
 
-나에 대한 질문에 답하는 개인 Q&A입니다. FastAPI가 요청을 받고, LangGraph가 `retrieve` → `generate` 순서로 프로필을 검색·답변합니다. 벡터 저장소는 Chroma이고, 화면은 Streamlit입니다.
+나에 대한 질문에 답하는 개인 Q&A입니다. FastAPI가 요청을 받고, LangGraph가 `rewrite` → `retrieve` → `generate` 순서로 프로필을 검색·답변합니다. 벡터 저장소는 Chroma이고, 화면은 Streamlit입니다.
 
 ## 폴더
 
@@ -8,7 +8,7 @@
 - `backend/api/routes/chat.py` — `POST /chat`이 그래프를 호출해 답변 반환
 - `backend/core/config.py` — 환경 변수
 - `backend/schemas/chat.py` — 요청·응답 모델
-- `ml/graph/` — 상태, `retrieve`/`generate` 노드, 그래프 컴파일
+- `ml/graph/` — 상태, `rewrite`/`retrieve`/`generate` 노드, 그래프 컴파일
 - `ml/rag/` — 프로필 로드, 청크, 벡터 저장, 적재
 - `data/profile/` — 답변에 쓰는 마크다운
 - `data/chroma/` — 로컬 벡터 저장소 (gitignore)
