@@ -2,7 +2,7 @@
 
 from langchain_core.embeddings import Embeddings
 
-from ml.rag.ingest import ingest_profile
+from ml.rag.ingest import ingest_profile, ingest_profile_if_empty
 from ml.rag.loader import load_profile_documents
 from ml.rag.splitter import split_documents
 from ml.rag.vectorstore import get_vector_store
@@ -32,3 +32,24 @@ def test_second_ingest_does_not_duplicate_chunks(tmp_path) -> None:
     expected = [chunk.page_content for chunk in split_documents(load_profile_documents())]
     assert stored is not None
     assert sorted(stored) == sorted(expected)
+
+
+def test_ingest_if_empty_runs_once(tmp_path) -> None:
+    """Empty store is filled once. A second call leaves the document count alone."""
+    directory = str(tmp_path)
+    embeddings = _FixedEmbedding()
+
+    assert ingest_profile_if_empty(
+        embeddings=embeddings,
+        persist_directory=directory,
+    )
+    store = get_vector_store(embeddings=embeddings, persist_directory=directory)
+    first_count = len(store.get()["documents"] or [])
+    assert first_count > 0
+
+    assert not ingest_profile_if_empty(
+        embeddings=embeddings,
+        persist_directory=directory,
+    )
+    second_count = len(store.get()["documents"] or [])
+    assert second_count == first_count

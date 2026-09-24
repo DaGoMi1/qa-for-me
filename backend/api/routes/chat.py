@@ -1,13 +1,31 @@
-"""Chat route. Graph invocation is left for a later step."""
+"""Chat route that runs the retrieve-then-generate graph."""
 
-from fastapi import APIRouter, HTTPException
+from typing import Any
+
+from fastapi import APIRouter, Depends
 
 from backend.schemas.chat import ChatRequest, ChatResponse
+from ml.graph.builder import build_graph
 
 router = APIRouter()
 
 
+def get_chat_graph() -> Any:
+    """Compile the default graph from settings and data/chroma."""
+    return build_graph()
+
+
 @router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest) -> ChatResponse:
-    """Accept a question. The retrieve-then-generate graph is not wired yet."""
-    raise HTTPException(status_code=501, detail="Chat graph is not implemented yet.")
+def chat(
+    request: ChatRequest,
+    graph: Any = Depends(get_chat_graph),
+) -> ChatResponse:
+    """Accept a question and return the graph answer."""
+    result = graph.invoke(
+        {
+            "question": request.question,
+            "context": [],
+            "answer": "",
+        }
+    )
+    return ChatResponse(answer=result["answer"])
