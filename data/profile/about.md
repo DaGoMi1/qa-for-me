@@ -116,7 +116,7 @@ M2VAE 사이드 정보 메모의 로컬 Recall@10은 상호작용만 0.0753, 가
 
 기간은 2026.01.16~2026.02.06이다. 저장소는 https://github.com/DaGoMi1/why-song-serious 이다. 원본 팀 저장소는 https://github.com/boostcampaitech8/pro-recsys-finalproject-recsys-03 이다.
 
-네이버 부스트캠프 AI Tech 최종 프로젝트로 만든 팀 음악 추천 서비스다. 팀은 구승민, 박주연, 송정호, 이다검, 이성재, 최연우다. 이다검의 역할은 FAISS와 DeepFM 모델링, 그리고 그 모델의 서빙 연동이다. 백엔드는 송정호, 프론트엔드는 박주연이다. 추천 추론은 FastAPI 앱 Why Song Serious AI API로 뜨고, 헬스 경로는 /health다.
+네이버 부스트캠프 AI Tech 최종 프로젝트로 만든 팀 음악 추천 서비스다. 팀은 구X민, 박X연, 송X호, 이다검, 이X재, 최X우다. 이다검의 역할은 FAISS와 DeepFM 모델링, 그리고 그 모델의 서빙 연동이다. 백엔드는 송정호, 프론트엔드는 박주연이다. 추천 추론은 FastAPI 앱 Why Song Serious AI API로 뜨고, 헬스 경로는 /health다.
 
 #### 풀려던 문제
 

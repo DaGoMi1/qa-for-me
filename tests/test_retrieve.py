@@ -41,6 +41,7 @@ def test_retrieve_puts_sentence_in_context(tmp_path) -> None:
         {
             "question": "어디서 살아?",
             "history": [],
+            "search_query": "어디서 살아?",
             "context": [],
             "answer": "이전 답",
         },
@@ -51,14 +52,15 @@ def test_retrieve_puts_sentence_in_context(tmp_path) -> None:
     assert result["answer"] == ""
 
 
-def test_retrieve_includes_history_in_search_query(tmp_path) -> None:
-    """Prior turns are part of the similarity search query."""
+def test_retrieve_uses_search_query_not_history(tmp_path) -> None:
+    """similarity_search gets search_query, not raw history text."""
     store = get_vector_store(
         embeddings=_FixedEmbedding(),
         persist_directory=str(tmp_path),
     )
     store.add_texts(["이다검은 부산에서 살고 있습니다."])
     spy = _SpyStore(store)
+    rewritten = "이다검이 한 다른 프로젝트 목록"
 
     retrieve(
         {
@@ -67,12 +69,12 @@ def test_retrieve_includes_history_in_search_query(tmp_path) -> None:
                 {"role": "user", "content": "프로젝트 뭐 있어?"},
                 {"role": "assistant", "content": "why-song-serious가 있습니다."},
             ],
+            "search_query": rewritten,
             "context": [],
             "answer": "",
         },
         vector_store=spy,
     )
 
-    assert spy.last_query is not None
-    assert "프로젝트 뭐 있어?" in spy.last_query
-    assert "그거 밖에 없어?" in spy.last_query
+    assert spy.last_query == rewritten
+    assert "프로젝트 뭐 있어?" not in (spy.last_query or "")

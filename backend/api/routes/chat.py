@@ -25,6 +25,7 @@ def chat(
         {
             "question": request.question,
             "history": [message.model_dump() for message in request.history],
+            "search_query": "",
             "context": [],
             "answer": "",
         }

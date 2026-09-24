@@ -11,9 +11,10 @@ class HistoryMessage(TypedDict):
 
 
 class GraphState(TypedDict):
-    """Question, history, retrieved snippets, and the drafted answer."""
+    """Question, history, search query, retrieved snippets, and answer."""
 
     question: str
     history: list[HistoryMessage]
+    search_query: str
     context: list[str]
     answer: str

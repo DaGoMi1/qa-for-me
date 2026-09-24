@@ -1,4 +1,4 @@
-"""Compiled graph runs retrieve, then generate, without an API call."""
+"""Compiled graph runs rewrite, retrieve, then generate, without an API call."""
 
 from langchain_core.embeddings import Embeddings
 
@@ -41,7 +41,13 @@ def test_graph_retrieves_then_answers(tmp_path) -> None:
     graph = build_graph(vector_store=store, model=_FixedModel())
 
     result = graph.invoke(
-        {"question": "어디서 살아?", "history": [], "context": [], "answer": ""}
+        {
+            "question": "어디서 살아?",
+            "history": [],
+            "search_query": "",
+            "context": [],
+            "answer": "",
+        }
     )
 
     assert sentence in result["context"]
