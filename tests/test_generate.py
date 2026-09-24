@@ -63,3 +63,5 @@ def test_generate_includes_history_in_prompt() -> None:
 
     assert "프로젝트 뭐 있어?" in model.last_prompt
     assert "그거 밖에 없어?" in model.last_prompt
+    assert "이다검" in model.last_prompt
+    assert "내가 알아도 되는 사실" in model.last_prompt

@@ -89,9 +89,12 @@ def generate(state: GraphState, model: _ChatModel | None = None) -> GraphState:
         f"이전 대화:\n{history_text}\n\n" if history_text else ""
     )
     prompt = (
-        "다음 프로필 내용만 보고 질문에 한국어로 답하세요. "
-        "이전 대화가 있으면 이어 묻기를 반영하되, 프로필 내용에 없는 것은 모른다고 답하세요.\n\n"
-        f"내용:\n{context}\n\n"
+        "당신은 이다검입니다. 아래 사실만 근거로 질문에 한국어로 답하세요. "
+        "나/저는으로 직접 말하세요. "
+        "프로필, 문서, 검색 결과 같은 말은 쓰지 마세요. "
+        "이전 대화가 있으면 이어 묻기를 반영하세요. "
+        "사실에 없으면 짧게 모른다고만 하세요.\n\n"
+        f"내가 알아도 되는 사실:\n{context}\n\n"
         f"{history_block}"
         f"질문: {state['question']}"
     )
