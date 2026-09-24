@@ -16,6 +16,18 @@ class _FixedEmbedding(Embeddings):
         return [1.0, 0.0, 0.0]
 
 
+class _SpyStore:
+    """Record the search query. Delegates retrieval to a real store."""
+
+    def __init__(self, store) -> None:
+        self._store = store
+        self.last_query: str | None = None
+
+    def similarity_search(self, query: str, k: int = 4):
+        self.last_query = query
+        return self._store.similarity_search(query, k=k)
+
+
 def test_retrieve_puts_sentence_in_context(tmp_path) -> None:
     """A stored sentence is copied into context and the answer stays empty."""
     store = get_vector_store(
@@ -26,9 +38,41 @@ def test_retrieve_puts_sentence_in_context(tmp_path) -> None:
     store.add_texts([sentence])
 
     result = retrieve(
-        {"question": "어디서 살아?", "context": [], "answer": "이전 답"},
+        {
+            "question": "어디서 살아?",
+            "history": [],
+            "context": [],
+            "answer": "이전 답",
+        },
         vector_store=store,
     )
 
     assert sentence in result["context"]
     assert result["answer"] == ""
+
+
+def test_retrieve_includes_history_in_search_query(tmp_path) -> None:
+    """Prior turns are part of the similarity search query."""
+    store = get_vector_store(
+        embeddings=_FixedEmbedding(),
+        persist_directory=str(tmp_path),
+    )
+    store.add_texts(["이다검은 부산에서 살고 있습니다."])
+    spy = _SpyStore(store)
+
+    retrieve(
+        {
+            "question": "그거 밖에 없어?",
+            "history": [
+                {"role": "user", "content": "프로젝트 뭐 있어?"},
+                {"role": "assistant", "content": "why-song-serious가 있습니다."},
+            ],
+            "context": [],
+            "answer": "",
+        },
+        vector_store=spy,
+    )
+
+    assert spy.last_query is not None
+    assert "프로젝트 뭐 있어?" in spy.last_query
+    assert "그거 밖에 없어?" in spy.last_query

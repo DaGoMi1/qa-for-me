@@ -45,7 +45,16 @@ def test_chat_returns_fake_answer(tmp_path) -> None:
     client = TestClient(app)
 
     try:
-        response = client.post("/chat", json={"question": "어디서 살아?"})
+        response = client.post(
+            "/chat",
+            json={
+                "question": "어디서 살아?",
+                "history": [
+                    {"role": "user", "content": "안녕"},
+                    {"role": "assistant", "content": "안녕하세요."},
+                ],
+            },
+        )
     finally:
         app.dependency_overrides.clear()
 

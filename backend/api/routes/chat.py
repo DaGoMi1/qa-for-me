@@ -24,6 +24,7 @@ def chat(
     result = graph.invoke(
         {
             "question": request.question,
+            "history": [message.model_dump() for message in request.history],
             "context": [],
             "answer": "",
         }

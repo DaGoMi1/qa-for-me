@@ -14,12 +14,12 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 
-def ask(question: str) -> str:
-    """Send a question to POST /chat and return the answer or the error text."""
+def ask(question: str, history: list[dict[str, str]]) -> str:
+    """Send a question and prior turns to POST /chat."""
     try:
         response = httpx.post(
             f"{API_BASE_URL}/chat",
-            json={"question": question},
+            json={"question": question, "history": history},
             timeout=30.0,
         )
     except httpx.HTTPError as exc:
@@ -45,7 +45,8 @@ with st.form("chat", clear_on_submit=True):
     submitted = st.form_submit_button("전송")
 
 if submitted and question.strip():
-    answer = ask(question.strip())
+    history = list(st.session_state.messages)
+    answer = ask(question.strip(), history)
     st.session_state.messages.append({"role": "user", "content": question.strip()})
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.rerun()

@@ -40,7 +40,9 @@ def test_graph_retrieves_then_answers(tmp_path) -> None:
     store.add_texts([sentence])
     graph = build_graph(vector_store=store, model=_FixedModel())
 
-    result = graph.invoke({"question": "어디서 살아?", "context": [], "answer": ""})
+    result = graph.invoke(
+        {"question": "어디서 살아?", "history": [], "context": [], "answer": ""}
+    )
 
     assert sentence in result["context"]
     assert result["answer"] == "부산에서 살고 있습니다."
