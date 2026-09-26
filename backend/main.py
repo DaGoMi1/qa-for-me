@@ -1,11 +1,16 @@
 """FastAPI application entrypoint."""
 
+import logging
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from backend.api.routes.chat import router as chat_router
 from ml.rag.ingest import ingest_profile_if_empty
+
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
 @asynccontextmanager

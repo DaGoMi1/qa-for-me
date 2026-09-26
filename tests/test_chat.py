@@ -1,5 +1,7 @@
 """POST /chat uses an injected graph so tests skip OpenAI."""
 
+import logging
+
 from fastapi.testclient import TestClient
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -37,7 +39,7 @@ class _RoutingModel:
         return _Message("부산에서 살고 있습니다.")
 
 
-def test_chat_returns_fake_answer(tmp_path) -> None:
+def test_chat_returns_fake_answer(tmp_path, caplog) -> None:
     """POST /chat returns the fake model answer when the graph is overridden."""
     store = get_vector_store(
         embeddings=_FixedEmbedding(),
@@ -55,19 +57,33 @@ def test_chat_returns_fake_answer(tmp_path) -> None:
     app.dependency_overrides[get_chat_graph] = lambda: graph
     client = TestClient(app)
 
-    try:
-        response = client.post(
-            "/chat",
-            json={
-                "question": "어디서 살아?",
-                "history": [
-                    {"role": "user", "content": "안녕"},
-                    {"role": "assistant", "content": "안녕하세요."},
-                ],
-            },
-        )
-    finally:
-        app.dependency_overrides.clear()
+    with caplog.at_level(logging.INFO, logger="uvicorn.error"):
+        try:
+            response = client.post(
+                "/chat",
+                json={
+                    "question": "어디서 살아?",
+                    "history": [
+                        {"role": "user", "content": "안녕"},
+                        {"role": "assistant", "content": "안녕하세요."},
+                    ],
+                },
+            )
+        finally:
+            app.dependency_overrides.clear()
 
     assert response.status_code == 200
     assert response.json() == {"answer": "부산에서 살고 있습니다."}
+
+    chat_logs = [
+        record
+        for record in caplog.records
+        if record.name == "uvicorn.error" and "intent=" in record.getMessage()
+    ]
+    assert chat_logs
+    message = chat_logs[-1].getMessage()
+    assert "intent=bio" in message
+    assert "source=bio.md" in message
+    assert "search_query=어디서 살아?" in message
+    assert "latency_ms=" in message
+    assert "n_history=2" in message
