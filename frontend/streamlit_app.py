@@ -7,8 +7,8 @@ import streamlit as st
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 
-st.set_page_config(page_title="qa-for-me")
-st.title("qa-for-me")
+st.set_page_config(page_title="Q&A for Me")
+st.title("Q&A for Me")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
