@@ -14,7 +14,7 @@ HASH_PATH = ROOT / "tests" / "eval" / "profile_hash.txt"
 REPORT_PATH = ROOT / "tests" / "eval" / "report.json"
 PROFILE_DIR = ROOT / "data" / "profile"
 
-_ABSTAIN_HINTS = ("모른", "없", "확인", "기억", "모르", "없어", "모름")
+_ABSTAIN_HINTS = ("모른", "모릅", "없", "확인", "기억", "모르", "없어", "모름")
 
 
 def profile_hash() -> str:

@@ -2,7 +2,7 @@
 
 ## Confident project
 
-가장 자신 있는 프로젝트는 qa-for-me다. 나에 대한 Q&A를 위해 프로필 로더, 청크, Chroma 적재, LangGraph의 prepare → retrieve(bio|projects) → generate, 대화 history, 1인칭 답변까지 직접 이어 붙인 개인 프로젝트이기 때문이다. Cursor를 쓰되 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
+가장 자신 있는 프로젝트는 qa-for-me다. 나에 대한 Q&A를 위해 프로필 로더, 청크, Chroma 적재, LangGraph의 prepare → retrieve(bio|projects) → generate, 대화 history, 품질 가드, uvicorn 로그까지 직접 이어 붙인 개인 프로젝트이기 때문이다. Cursor를 쓰되 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
 
 ## Project
 
@@ -130,16 +130,24 @@ DeepFM으로 저차원·고차원 상호작용을 같이 학습하고, 임베딩
 
 #### 풀려던 문제
 
-사용자는 자연어로 이다검에 대해 묻는다. 답은 프로필 마크다운에 있는 사실 안에서만 나와야 하고, 1인칭으로 들려야 한다. 소개(bio)와 프로젝트(projects)를 가르고, 이어 묻기도 이전 대화를 반영한 검색어로 다시 찾아야 한다. Cursor를 쓰되 수정 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
+사용자는 자연어로 이다검에 대해 묻는다. 답은 프로필 마크다운에 있는 사실 안에서만 나와야 하고, 나/저는 1인칭으로 들려야 한다. 소개(bio)와 프로젝트(projects)를 가르고, 이어 묻기는 이전 대화를 반영한 검색어(search_query)로 다시 찾아야 한다. 근거에 없으면 짧게 모른다고만 하고, 시제를 바꾸거나 없는 구현·수치·도구를 지어내면 안 된다. Cursor를 쓰되 수정 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
 
 #### 데이터
 
-답변 근거는 data/profile/bio.md와 projects.md다. 청크로 나눈 뒤 Chroma 컬렉션 profile에 넣고, 경로 data/chroma에 둔다. 공개 학습 데이터가 아니다.
+답변 근거는 data/profile/bio.md와 projects.md다. 로더는 data/profile 아래 *.md를 모두 읽으므로 about.md 같은 여분 마크다운은 두지 않는다. 청크로 나눈 뒤 Chroma 컬렉션 profile에 넣고, 경로 data/chroma에 둔다. 공개 학습 데이터가 아니다.
 
 #### 만든 시스템
 
-스택은 Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI embeddings(text-embedding-3-small), 채팅 모델 gpt-4o-mini다. 그래프는 prepare → retrieve(bio|projects) → generate다. prepare가 intent(bio|projects)와 검색용 한국어 한 문장(search_query)을 한 번에 만들고, retrieve는 source 필터로 해당 파일 청크만 고른다. generate는 고른 내용만 근거로 1인칭 한국어 답을 쓴다. 청킹은 LangChain RecursiveCharacterTextSplitter로 chunk_size 800, chunk_overlap 100이며, 구분자는 ## / ### / #### 헤더를 우선한다. 의미 단위(시맨틱) 청킹은 쓰지 않는다. Streamlit은 최근 대화를 history로 POST /chat에 보낸다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다. 단위 테스트는 가짜 모델·임베딩으로 pytest한다.
+스택은 Python 3.11+, FastAPI, uvicorn, Streamlit, LangChain, LangGraph, Chroma, OpenAI embeddings(text-embedding-3-small), 채팅 모델 gpt-4o-mini(설정 기본값)다. 설정은 pydantic-settings로 .env의 OPENAI_API_KEY, OPENAI_MODEL, embedding_model, vector_store_path를 읽는다.
+
+API는 FastAPI다. GET /health는 프로세스 생존만 보고한다. POST /chat은 질문과 history를 받아 LangGraph를 돌리고 answer만 돌려준다. 화면은 Streamlit이다. 브라우저 탭·제목은 Q&A for Me이고, 저장소·패키지 이름은 qa-for-me다. Streamlit은 최근 대화를 history로 POST /chat에 보내며, API 주소는 API_BASE_URL(기본 http://127.0.0.1:8000)이다.
+
+그래프는 prepare → retrieve(bio|projects) → generate다. prepare는 모델 한 번으로 intent(bio|projects)와 검색용 한국어 한 문장 search_query를 만든다. 소개·학교·거주지·관심·강점은 bio, 프로젝트 목록·특정 프로젝트·자신 있는 프로젝트는 projects다. 이전 대화가 있으면 이어 묻기를 search_query에 반영하고, 없으면 질문과 같게 둔다. history는 최근 4턴만 프롬프트에 넣는다. retrieve는 similarity_search로 k=4를 고르고, source 메타데이터로 bio.md 또는 projects.md 청크만 남긴다. generate는 고른 청크만 근거로 1인칭 한국어 답을 쓴다. 프롬프트에 프로필·문서·검색 결과 같은 말을 쓰지 말 것, 근거 문장 시제·시점을 바꾸지 말 것(예: 취득했다를 취득할 예정으로 바꾸지 말 것), 근거에 없는 구현 단계·수치·도구 이름을 지어내지 말 것, 없으면 짧게 모른다고만 할 것을 넣었다.
+
+청킹은 LangChain RecursiveCharacterTextSplitter로 chunk_size 800, chunk_overlap 100이다. 구분자는 줄바꿈 뒤 ## / ### / #### 헤더를 우선하고, 그다음 빈 줄·줄·공백·문자다. 의미 단위(시맨틱) 청킹은 쓰지 않는다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다.
+
+관측은 POST /chat마다 uvicorn.error 로거로 남긴다. intent, search_query, source(bio.md|projects.md), n_context, n_history, latency_ms, question_chars, answer_chars를 줄바꿈 key=value로 찍는다. 질문·답 전문은 넣지 않는다. httpx와 httpcore 로그는 WARNING으로 올려 OpenAI 호출 줄을 숨긴다.
 
 #### 말하면 안 되는 것
 
-클라우드 공개 배포나 CI가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다.
+Docker Compose·Dockerfile·CI·공개 클라우드 배포가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다. LangSmith를 붙였다고 말하면 안 된다. 관측은 uvicorn 콘솔 로그뿐이다다.
