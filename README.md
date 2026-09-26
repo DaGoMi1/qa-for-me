@@ -1,6 +1,6 @@
 # qa-for-me
 
-나에 대한 질문에 답하는 개인 Q&A입니다. FastAPI가 요청을 받고, LangGraph가 `rewrite` → `retrieve` → `generate` 순서로 프로필을 검색·답변합니다. 벡터 저장소는 Chroma이고, 화면은 Streamlit입니다.
+나에 대한 질문에 답하는 개인 Q&A입니다. FastAPI가 요청을 받고, LangGraph가 `prepare` → `retrieve`(bio|projects) → `generate` 순서로 프로필을 검색·답변합니다. 벡터 저장소는 Chroma이고, 화면은 Streamlit입니다.
 
 ## 폴더
 
@@ -8,9 +8,9 @@
 - `backend/api/routes/chat.py` — `POST /chat`이 그래프를 호출해 답변 반환
 - `backend/core/config.py` — 환경 변수
 - `backend/schemas/chat.py` — 요청·응답 모델
-- `ml/graph/` — 상태, `rewrite`/`retrieve`/`generate` 노드, 그래프 컴파일
+- `ml/graph/` — 상태, `prepare`/`retrieve`/`generate` 노드, 그래프 컴파일
 - `ml/rag/` — 프로필 로드, 청크, 벡터 저장, 적재
-- `data/profile/` — 답변에 쓰는 마크다운
+- `data/profile/` — `bio.md`(소개)와 `projects.md`(프로젝트)
 - `data/chroma/` — 로컬 벡터 저장소 (gitignore)
 - `scripts/ingest.py` — 프로필을 강제로 다시 적재할 때 사용
 - `frontend/streamlit_app.py` — 질문을 `POST /chat`으로 보내는 화면
@@ -43,7 +43,7 @@ Streamlit이 붙는 API 주소는 `API_BASE_URL`이며, 없으면 `http://127.0.
 
 서버가 뜰 때 `data/chroma`의 프로필 컬렉션이 비어 있으면 한 번 적재합니다. 이미 벡터가 있으면 그대로 씁니다.
 
-`data/profile/about.md`를 고친 뒤에는 다시 넣어야 합니다.
+`data/profile/` 마크다운을 고친 뒤에는 다시 넣어야 합니다.
 
 ```bash
 python scripts/ingest.py
