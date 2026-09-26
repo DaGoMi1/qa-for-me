@@ -39,6 +39,11 @@ streamlit run frontend/streamlit_app.py
 
 Streamlit이 붙는 API 주소는 `API_BASE_URL`이며, 없으면 `http://127.0.0.1:8000`입니다.
 
+## 관측
+
+`POST /chat`마다 uvicorn INFO와 같은 로거(`uvicorn.error`)로 필드별 줄바꿈 로그가 남습니다.  
+`intent`, `search_query`, 라우팅 `source`(bio.md|projects.md), `n_context`, `latency_ms` 등으로 “왜 그쪽으로 검색했는지”를 볼 수 있습니다. 질문·답 전문은 넣지 않고 길이만 남깁니다.
+
 ## 적재
 
 서버가 뜰 때 `data/chroma`의 프로필 컬렉션이 비어 있으면 한 번 적재합니다. 이미 벡터가 있으면 그대로 씁니다.
