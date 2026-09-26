@@ -138,8 +138,8 @@ DeepFM으로 저차원·고차원 상호작용을 같이 학습하고, 임베딩
 
 #### 만든 시스템
 
-스택은 Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI embeddings(text-embedding-3-small), 채팅 모델 gpt-4o-mini다. 그래프는 prepare → retrieve(bio|projects) → generate다. prepare가 intent(bio|projects)와 검색용 한국어 한 문장(search_query)을 한 번에 만들고, retrieve는 source 필터로 해당 파일 청크만 고른다. generate는 고른 내용만 근거로 1인칭 한국어 답을 쓴다. Streamlit은 최근 대화를 history로 POST /chat에 보낸다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다. 단위 테스트는 가짜 모델·임베딩으로 pytest한다.
+스택은 Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI embeddings(text-embedding-3-small), 채팅 모델 gpt-4o-mini다. 그래프는 prepare → retrieve(bio|projects) → generate다. prepare가 intent(bio|projects)와 검색용 한국어 한 문장(search_query)을 한 번에 만들고, retrieve는 source 필터로 해당 파일 청크만 고른다. generate는 고른 내용만 근거로 1인칭 한국어 답을 쓴다. 청킹은 LangChain RecursiveCharacterTextSplitter로 chunk_size 800, chunk_overlap 100이며, 구분자는 ## / ### / #### 헤더를 우선한다. 의미 단위(시맨틱) 청킹은 쓰지 않는다. Streamlit은 최근 대화를 history로 POST /chat에 보낸다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다. 단위 테스트는 가짜 모델·임베딩으로 pytest한다.
 
 #### 말하면 안 되는 것
 
-클라우드 공개 배포나 CI가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다.
+클라우드 공개 배포나 CI가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다.

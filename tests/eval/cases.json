@@ -49,8 +49,19 @@
     "question": "자격증 뭐 있어?",
     "history": [],
     "expected_intent": "bio",
-    "must_include": ["정보처리기사"],
-    "must_not_include": [],
+    "must_include": ["정보처리기사", "취득"],
+    "must_not_include": ["예정입니다", "예정이다", "딸 예정", "취득할 예정"],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "bio_cert_tense",
+    "category": "bio",
+    "question": "정보처리기사는 언제 땄어?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["2024"],
+    "must_not_include": ["예정입니다", "예정이다", "딸 예정", "취득할 예정"],
     "expect_abstain": false,
     "context_must_include": []
   },
