@@ -1,0 +1,234 @@
+[
+  {
+    "id": "bio_location",
+    "category": "bio",
+    "question": "어디 살아?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["부산"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "bio_school",
+    "category": "bio",
+    "question": "어느 학교 나왔어?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["한국해양"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "bio_github",
+    "category": "bio",
+    "question": "깃허브 주소 알려줘",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["DaGoMi1"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "bio_career",
+    "category": "bio",
+    "question": "어떤 직무를 원해?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["AI"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "bio_cert",
+    "category": "bio",
+    "question": "자격증 뭐 있어?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["정보처리기사"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "proj_confident",
+    "category": "projects",
+    "question": "자신 있는 프로젝트가 뭐야?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["qa-for-me"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "proj_list",
+    "category": "projects",
+    "question": "프로젝트 뭐 했어?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["delivery"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "proj_why_song",
+    "category": "projects",
+    "question": "Why Song Serious에서 네 역할이 뭐야?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["서빙"],
+    "must_not_include": ["프론트"],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "proj_qa_stack",
+    "category": "projects",
+    "question": "qa-for-me 기술 스택이 뭐야?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["LangGraph"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "proj_movie",
+    "category": "projects",
+    "question": "영화 추천 대회에서 뭘 구현했어?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["VAE"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "amb_confident_thing",
+    "category": "ambiguous",
+    "question": "자신 있는 거 뭐야?",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": ["qa-for-me"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "amb_strength",
+    "category": "ambiguous",
+    "question": "강점이 뭐야?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["몰입"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "amb_boostcamp",
+    "category": "ambiguous",
+    "question": "부스트캠프 몇 기야?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": ["8기"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": []
+  },
+  {
+    "id": "fu_when",
+    "category": "followup",
+    "question": "그건 언제 했어?",
+    "history": [
+      {"role": "user", "content": "Delivery Service 프로젝트 뭐야?"},
+      {"role": "assistant", "content": "음식 주문 서비스의 백엔드를 만들었어요."}
+    ],
+    "expected_intent": "projects",
+    "must_include": ["2024"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": ["Delivery"]
+  },
+  {
+    "id": "fu_graph",
+    "category": "followup",
+    "question": "그 그래프 구조는 어떻게 돼?",
+    "history": [
+      {"role": "user", "content": "qa-for-me가 뭐야?"},
+      {"role": "assistant", "content": "나에 대한 개인 Q&A 프로젝트예요. LangGraph로 돌립니다."}
+    ],
+    "expected_intent": "projects",
+    "must_include": ["prepare"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": ["prepare"]
+  },
+  {
+    "id": "fu_role",
+    "category": "followup",
+    "question": "Why Song Serious에서 네가 맡은 역할은?",
+    "history": [
+      {"role": "user", "content": "Why Song Serious 설명해줘"},
+      {"role": "assistant", "content": "음악 추천 팀 프로젝트예요. FAISS와 DeepFM을 썼어요."}
+    ],
+    "expected_intent": "projects",
+    "must_include": ["서빙"],
+    "must_not_include": ["프론트"],
+    "expect_abstain": false,
+    "context_must_include": ["DeepFM"]
+  },
+  {
+    "id": "fu_other",
+    "category": "followup",
+    "question": "그거 말고 다른 프로젝트는?",
+    "history": [
+      {"role": "user", "content": "자신 있는 프로젝트 뭐야?"},
+      {"role": "assistant", "content": "qa-for-me예요."}
+    ],
+    "expected_intent": "projects",
+    "must_include": ["movie"],
+    "must_not_include": [],
+    "expect_abstain": false,
+    "context_must_include": ["delivery"]
+  },
+  {
+    "id": "unk_license",
+    "category": "unknown",
+    "question": "운전면허는 언제 땄어?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": [],
+    "must_not_include": ["2020", "2021", "2022", "2023"],
+    "expect_abstain": true,
+    "context_must_include": []
+  },
+  {
+    "id": "unk_company",
+    "category": "unknown",
+    "question": "네이버에서 몇 년 일했어?",
+    "history": [],
+    "expected_intent": "bio",
+    "must_include": [],
+    "must_not_include": ["재직", "입사"],
+    "expect_abstain": true,
+    "context_must_include": []
+  },
+  {
+    "id": "unk_busan_trip",
+    "category": "unknown",
+    "question": "Busan Trip RAG 프로젝트 자세히 설명해줘",
+    "history": [],
+    "expected_intent": "projects",
+    "must_include": [],
+    "must_not_include": [],
+    "expect_abstain": true,
+    "context_must_include": []
+  }
+]
