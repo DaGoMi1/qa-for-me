@@ -55,6 +55,33 @@ python scripts/ingest.py
 pytest
 ```
 
+단위 테스트는 가짜 모델로 OpenAI를 호출하지 않습니다.
+
+## 프로필 고정과 eval
+
+`data/profile/bio.md`와 `projects.md`가 eval 기준입니다. 둘만 두고 `about.md` 같은 다른 마크다운은 넣지 마세요(로더가 `*.md` 전부 읽습니다).
+
+프로필을 고친 뒤에는 순서대로:
+
+1. `python scripts/ingest.py`로 Chroma 재적재
+2. `tests/eval/profile_hash.txt`를 새 SHA-256으로 갱신  
+   (`bio.md`+`projects.md` 바이트 해시; `scripts/eval_chat.py`가 불일치면 채점 전에 종료)
+3. `tests/eval/cases.json`의 `must_include` / unknown 케이스 재검토
+4. `python scripts/eval_chat.py` 실행 (실 OpenAI 키 필요)
+
+```bash
+python scripts/eval_chat.py
+```
+
+합격선(게이트):
+
+- Intent accuracy ≥ 90%
+- `must_not_include` 위반 = 0
+- unknown(abstain) 케이스 ≥ 80%
+- followup 케이스 ≥ 80%
+
+`must_include` 적중률은 리포트에만 남기고 첫 게이트에는 넣지 않습니다. 결과는 `tests/eval/report.json`에 쓰이며 gitignore합니다.
+
 ## 알려진 한계
 
 최근 대화는 API로 넘기지만, 답은 검색된 프로필 조각 안에 있는 내용으로만 만듭니다. 검색이 빗나가면 이어 묻기도 부족하게 답할 수 있습니다.
