@@ -1,11 +1,13 @@
 """POST /chat uses an injected graph so tests skip OpenAI."""
 
 from fastapi.testclient import TestClient
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 
 from backend.api.routes.chat import get_chat_graph
 from backend.main import app
 from ml.graph.builder import build_graph
+from ml.rag.loader import PROFILE_DIR
 from ml.rag.vectorstore import get_vector_store
 
 
@@ -26,10 +28,12 @@ class _Message:
         self.content = content
 
 
-class _FixedModel:
-    """Return the same sentence for every prompt."""
+class _RoutingModel:
+    """Prepare-shaped reply for prepare prompts; fixed answer otherwise."""
 
     def invoke(self, prompt: str) -> _Message:
+        if "intent: bio 또는 projects" in prompt:
+            return _Message("intent: bio\nsearch_query: 어디서 살아?")
         return _Message("부산에서 살고 있습니다.")
 
 
@@ -39,8 +43,15 @@ def test_chat_returns_fake_answer(tmp_path) -> None:
         embeddings=_FixedEmbedding(),
         persist_directory=str(tmp_path),
     )
-    store.add_texts(["이다검은 부산에서 살고 있습니다."])
-    graph = build_graph(vector_store=store, model=_FixedModel())
+    store.add_documents(
+        [
+            Document(
+                page_content="이다검은 부산에서 살고 있습니다.",
+                metadata={"source": str(PROFILE_DIR / "bio.md")},
+            )
+        ]
+    )
+    graph = build_graph(vector_store=store, model=_RoutingModel())
     app.dependency_overrides[get_chat_graph] = lambda: graph
     client = TestClient(app)
 

@@ -1,22 +1,12 @@
-# About
+# Projects
 
-학부 때 백엔드에 관심을 두고 학습했고, 최근에는 AI를 붙인 서비스를 만드는 데 관심이 있습니다. 추천 후보를 검색이 고르고, LLM은 그 후보 안에서만 이유를 쓰도록 서비스를 구성합니다.
+## Confident project
 
-## Name
-
-이름은 이다검입니다.
-
-## Location
-
-부산에서 살고 있습니다.
-
-## GitHub
-
-깃허브는 https://github.com/DaGoMi1 입니다.
+가장 자신 있는 프로젝트는 qa-for-me다. 나에 대한 Q&A를 위해 프로필 로더, 청크, Chroma 적재, LangGraph의 prepare → retrieve → generate, 대화 history, 1인칭 답변까지 직접 이어 붙인 개인 프로젝트이기 때문이다.
 
 ## Project
 
-기간순 목록이다. delivery-service(2025.02~2025.04, 배달 백엔드), movie-recommendation(2025.12~2026.01, 영화 추천 대회), why-song-serious(2026.01~2026.02, 음악 추천 서빙), why-this-product(2026.09, 쇼핑 어시스턴트)다. 상세는 아래 각 절이다.
+기간순 목록이다. delivery-service(2025.02~2025.04, 배달 백엔드), movie-recommendation(2025.12~2026.01, 영화 추천 대회), why-song-serious(2026.01~2026.02, 음악 추천 서빙), why-this-product(2026.09, 쇼핑 어시스턴트), qa-for-me(2026.09~진행 중, 개인 Q&A)다. 상세는 아래 각 절이다.
 
 ### delivery-service
 
@@ -261,8 +251,32 @@ Amazon All_Beauty에서 유저×상품 희소도가 99.9%를 넘었고, 유저�
 
 랭킹 모델이 인기순을 이겼다고 말하면 안 된다. 이기지 못했다. 사람이 라벨한 검색 정답으로 Precision 0.545를 받았다고 말하면 안 된다. 규칙 gold이고, 오탐 0은 그 규칙과 같은 게이트를 검색에 넣어서 나온 값이다. LLM이 추천 품질을 올렸다고 말하면 안 된다. LLM은 설명만 하고, 추천 지표와 섞지 않았다. 카테고리 다양성을 높였다고 말하면 안 된다. 이 카탈로그의 카테고리는 하나다. Two-Tower를 서비스에 넣었다고 말하면 안 된다. 학습 후 Recall@10이 0이라 빼 두었다. 클라우드에 공개 배포했거나 CI가 있다고 말하면 안 된다. Docker Compose까지이고, GitHub Actions와 공개 데모 배포는 아직이다.
 
-주로 쓰는 기술은 Python, FastAPI, OpenAI, FAISS, PyTorch, LightGBM, Spring Boot, JPA, JWT, MySQL, Redis, Docker입니다.
+### qa-for-me
 
-## Interests
+기간은 2026.09부터 진행 중이다. 저장소는 https://github.com/DaGoMi1/qa-for-me 이다. 이다검 혼자 만든 개인 Q&A 프로젝트다.
 
-LangGraph와 LangChain으로 개인 질의응답을 만드는 데 관심이 있습니다. 추천 검색과 LLM 설명을 한 서비스로 잇는 일도 관심사입니다.
+나에 대한 질문에, 프로필 마크다운에 있는 근거만으로 한국어 1인칭 답을 만드는 서비스다. FastAPI가 요청을 받고, Streamlit이 화면을 띄우며, LangGraph가 검색과 답변 순서를 잇는다.
+
+#### 풀려던 문제
+
+사용자는 자연어로 묻는다. 답은 프로필에 있는 사실 안에서만 나와야 하고, 이다검 본인이 말하는 것처럼 들려야 한다. 이어 묻기("그거 말고 다른 건?")도 이전 대화와 맞는 검색어로 다시 찾아야 한다.
+
+#### 데이터
+
+답변 근거는 data/profile/bio.md와 projects.md다. 청크로 나눈 뒤 Chroma 컬렉션 profile에 넣고, 경로 data/chroma에 둔다. 공개 학습 데이터가 아니다.
+
+#### 만든 시스템
+
+스택은 Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI embeddings(text-embedding-3-small), 채팅 모델 gpt-4o-mini다.
+
+그래프는 prepare → retrieve(bio|projects) → generate다. prepare가 intent와 검색용 한국어 한 문장(search_query)을 한 번에 만들고, retrieve는 그 search_query로 유사 청크를 고른다. generate는 고른 내용만 근거로 이다검 1인칭으로 답한다. Streamlit은 최근 대화를 history로 POST /chat에 보낸다.
+
+적재는 마크다운 로드, RecursiveCharacterTextSplitter 청크, Chroma add다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필 마크다운을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다.
+
+#### 말해도 되는 것
+
+2026년 9월부터 개인 Q&A qa-for-me를 만들고 있다. 프로필 로더, 청크, Chroma, LangGraph prepare·retrieve·generate, 대화 history, 1인칭 답변을 직접 이었다. 가장 자신 있는 프로젝트로 꼽는다. FastAPI와 Streamlit으로 로컬에서 질문할 수 있다.
+
+#### 말하면 안 되는 것
+
+클라우드 공개 배포나 CI가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크 점수나 리더보드가 있다고 말하면 안 된다. 측정 수치는 없다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다.

@@ -33,6 +33,7 @@ def test_generate_keeps_question_and_fills_answer() -> None:
     state = {
         "question": "어디서 살아?",
         "history": [],
+        "intent": "bio",
         "search_query": "어디서 살아?",
         "context": ["이다검은 부산에서 살고 있습니다."],
         "answer": "",
@@ -54,6 +55,7 @@ def test_generate_includes_history_in_prompt() -> None:
             {"role": "user", "content": "프로젝트 뭐 있어?"},
             {"role": "assistant", "content": "why-song-serious가 있습니다."},
         ],
+        "intent": "projects",
         "search_query": "이다검이 한 다른 프로젝트 목록",
         "context": ["프로젝트: why-song-serious, movie-recommendation"],
         "answer": "",

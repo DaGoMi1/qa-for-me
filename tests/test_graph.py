@@ -1,8 +1,10 @@
-"""Compiled graph runs rewrite, retrieve, then generate, without an API call."""
+"""Compiled graph runs prepare, retrieve, then generate."""
 
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 
 from ml.graph.builder import build_graph
+from ml.rag.loader import PROFILE_DIR
 from ml.rag.vectorstore import get_vector_store
 
 
@@ -23,27 +25,37 @@ class _Message:
         self.content = content
 
 
-class _FixedModel:
-    """Return the same sentence for every prompt."""
+class _RoutingModel:
+    """Prepare-shaped reply for prepare prompts; fixed answer otherwise."""
 
     def invoke(self, prompt: str) -> _Message:
+        if "intent: bio 또는 projects" in prompt:
+            return _Message("intent: bio\nsearch_query: 어디서 살아?")
         return _Message("부산에서 살고 있습니다.")
 
 
 def test_graph_retrieves_then_answers(tmp_path) -> None:
-    """A stored sentence lands in context and the fake reply becomes the answer."""
+    """A bio sentence lands in context and the fake reply becomes the answer."""
     store = get_vector_store(
         embeddings=_FixedEmbedding(),
         persist_directory=str(tmp_path),
     )
     sentence = "이다검은 부산에서 살고 있습니다."
-    store.add_texts([sentence])
-    graph = build_graph(vector_store=store, model=_FixedModel())
+    store.add_documents(
+        [
+            Document(
+                page_content=sentence,
+                metadata={"source": str(PROFILE_DIR / "bio.md")},
+            )
+        ]
+    )
+    graph = build_graph(vector_store=store, model=_RoutingModel())
 
     result = graph.invoke(
         {
             "question": "어디서 살아?",
             "history": [],
+            "intent": "",
             "search_query": "",
             "context": [],
             "answer": "",
@@ -51,4 +63,5 @@ def test_graph_retrieves_then_answers(tmp_path) -> None:
     )
 
     assert sentence in result["context"]
+    assert result["intent"] == "bio"
     assert result["answer"] == "부산에서 살고 있습니다."
