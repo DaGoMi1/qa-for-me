@@ -1,4 +1,4 @@
-"""Load profile markdown into LangChain documents."""
+"""프로필 마크다운을 LangChain 문서로 불러오기"""
 
 from pathlib import Path
 
@@ -8,7 +8,7 @@ PROFILE_DIR = Path(__file__).resolve().parents[2] / "data" / "profile"
 
 
 def load_profile_documents() -> list[Document]:
-    """Read markdown files from data/profile."""
+    """data/profile 디렉토리에서 마크다운 파일을 읽어 LangChain 문서로 변환"""
     documents: list[Document] = []
     for path in sorted(PROFILE_DIR.glob("*.md")):
         documents.append(

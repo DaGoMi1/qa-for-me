@@ -1,4 +1,4 @@
-"""Split profile documents into retrieval-sized chunks."""
+"""프로필 문서를 검색 가능한 청크로 분할"""
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,5 +11,5 @@ _SPLITTER = RecursiveCharacterTextSplitter(
 
 
 def split_documents(documents: list[Document]) -> list[Document]:
-    """Break loaded documents into retrieval-sized chunks."""
+    """불러온 문서를 검색 가능한 청크로 분할"""
     return _SPLITTER.split_documents(documents)

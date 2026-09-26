@@ -1,4 +1,4 @@
-"""Load profile markdown, chunk it, and replace the vector store contents."""
+"""프로필 마크다운을 불러와 청크로 나누고, 벡터 스토어에 저장"""
 
 from langchain_core.embeddings import Embeddings
 
@@ -11,7 +11,7 @@ def profile_store_is_empty(
     embeddings: Embeddings | None = None,
     persist_directory: str | None = None,
 ) -> bool:
-    """Return True when the profile collection has no stored documents."""
+    """프로필 컬렉션에 저장된 문서가 없으면 True 반환"""
     store = get_vector_store(
         embeddings=embeddings,
         persist_directory=persist_directory,
@@ -24,7 +24,7 @@ def ingest_profile(
     embeddings: Embeddings | None = None,
     persist_directory: str | None = None,
 ) -> None:
-    """Load profile markdown, chunk it, and write embeddings to the vector store."""
+    """프로필 마크다운을 불러와 청크로 나누고, 벡터 스토어에 저장"""
     chunks = split_documents(load_profile_documents())
     store = get_vector_store(
         embeddings=embeddings,
@@ -38,7 +38,7 @@ def ingest_profile_if_empty(
     embeddings: Embeddings | None = None,
     persist_directory: str | None = None,
 ) -> bool:
-    """Ingest only when the store is empty. Return True if ingestion ran."""
+    """벡터 스토어가 비어있을 때만 프로필을 저장하고, 저장이 실행되면 True 반환"""
     if not profile_store_is_empty(
         embeddings=embeddings,
         persist_directory=persist_directory,

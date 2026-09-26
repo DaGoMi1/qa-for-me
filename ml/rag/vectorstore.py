@@ -1,4 +1,4 @@
-"""Open the local Chroma store. Profile documents are not written here."""
+"""로컬 Chroma 스토어 열기"""
 
 from langchain_chroma import Chroma
 from langchain_core.embeddings import Embeddings
@@ -11,7 +11,7 @@ def get_vector_store(
     embeddings: Embeddings | None = None,
     persist_directory: str | None = None,
 ) -> Chroma:
-    """Open the local vector store at the configured path."""
+    """설정된 경로에 있는 로컬 벡터 스토어 열기"""
     settings = get_settings()
     if embeddings is None:
         embeddings = OpenAIEmbeddings(
