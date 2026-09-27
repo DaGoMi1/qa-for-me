@@ -1,92 +1,71 @@
-# qa-for-me
+# Q&A for Me
 
-나에 대한 질문에 답하는 개인 Q&A입니다. FastAPI가 요청을 받고, LangGraph가 `prepare` → `retrieve`(bio|projects) → `generate` 순서로 프로필을 검색·답변합니다. 벡터 저장소는 Chroma이고, 화면은 Streamlit입니다.
+나에 대한 질문에, 직접 적은 프로필 문서만 근거로 답하는 개인 Q&A입니다.
 
-## 폴더
+FastAPI가 `POST /chat`을 받고, LangGraph가 `prepare` → `retrieve`(bio|projects) → `generate` 순으로 검색·생성합니다. 벡터 저장소는 Chroma, 화면은 Streamlit입니다.
 
-- `backend/main.py` — FastAPI 앱, `/health`, 기동 시 빈 저장소만 적재
-- `backend/api/routes/chat.py` — `POST /chat`이 그래프를 호출해 답변 반환
-- `backend/core/config.py` — 환경 변수
-- `backend/schemas/chat.py` — 요청·응답 모델
-- `ml/graph/` — 상태, `prepare`/`retrieve`/`generate` 노드, 그래프 컴파일
-- `ml/rag/` — 프로필 로드, 청크, 벡터 저장, 적재
-- `data/profile/` — `bio.md`(소개)와 `projects.md`(프로젝트)
-- `data/chroma/` — 로컬 벡터 저장소 (gitignore)
-- `scripts/ingest.py` — 프로필을 강제로 다시 적재할 때 사용
-- `frontend/streamlit_app.py` — 질문을 `POST /chat`으로 보내는 화면
-- `tests/` — pytest
+## 구성
+
+| 경로 | 역할 |
+|------|------|
+| `backend/` | FastAPI (`/health`, `/chat`) |
+| `ml/graph/` | LangGraph 노드·컴파일 |
+| `ml/rag/` | 프로필 로드·청크·Chroma |
+| `data/profile/` | `bio.md`, `projects.md` |
+| `frontend/` | Streamlit UI |
+| `scripts/` | 적재·eval |
+| `tests/` | pytest · gold eval |
+
+배포는 `Dockerfile` / `docker-compose.yml`로 API와 Streamlit을 함께 띄웁니다. GitHub Actions로 `pytest`(CI)와 `main` 푸시 시 EC2 Compose 재배포(CD)를 돌립니다.
 
 ## 실행
+
+`.env`에 `OPENAI_API_KEY`가 필요합니다. (`.env.example` 참고)
+
+**Docker**
+
+```bash
+docker compose up --build
+```
+
+→ `http://localhost:8501`  
+Compose에서 Streamlit은 `http://api:8000`으로 API에 연결합니다.
+
+**로컬 (venv)**
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 pip install -e ".[dev]"
-```
-
-OpenAI API 키 등 로컬 설정을 준비한 뒤 API를 띄웁니다.
-
-```bash
 uvicorn backend.main:app --reload
 ```
 
-다른 터미널에서 화면을 띄웁니다.
+다른 터미널:
 
 ```bash
-.venv\Scripts\activate
 streamlit run frontend/streamlit_app.py
 ```
 
-Streamlit이 붙는 API 주소는 `API_BASE_URL`이며, 없으면 `http://127.0.0.1:8000`입니다.
+`API_BASE_URL` 기본값은 `http://127.0.0.1:8000`입니다.
 
-## 관측
+## 동작 요약
 
-`POST /chat`마다 uvicorn INFO와 같은 로거(`uvicorn.error`)로 필드별 줄바꿈 로그가 남습니다.  
-`intent`, `search_query`, 라우팅 `source`(bio.md|projects.md), `n_context`, `latency_ms` 등으로 “왜 그쪽으로 검색했는지”를 볼 수 있습니다. 질문·답 전문은 넣지 않고 길이만 남깁니다.
+- **prepare**: intent(`bio`|`projects`)와 검색용 `search_query`를 한 번에 만듦
+- **retrieve**: source 필터로 해당 프로필 청크만 검색 (k=4)
+- **generate**: 검색된 사실만으로 1인칭 한국어 답변 (없으면 모른다고)
+- 기동 시 Chroma가 비어 있으면 프로필을 적재하고, 문서 변경 후에는 `python scripts/ingest.py`
+- `POST /chat`마다 `uvicorn.error`에 intent·source·latency 등 관측 로그
 
-## 적재
-
-서버가 뜰 때 `data/chroma`의 프로필 컬렉션이 비어 있으면 한 번 적재합니다. 이미 벡터가 있으면 그대로 씁니다.
-
-`data/profile/` 마크다운을 고친 뒤에는 다시 넣어야 합니다.
-
-```bash
-python scripts/ingest.py
-```
-
-## 테스트
+## 테스트 · eval
 
 ```bash
 pytest
 ```
 
-단위 테스트는 가짜 모델로 OpenAI를 호출하지 않습니다.
+단위 테스트는 가짜 모델·임베딩을 쓰며 OpenAI를 호출하지 않습니다.
 
-## 프로필 고정과 eval
+`scripts/eval_chat.py`는 실 API로 gold set을 채점합니다. `bio.md`+`projects.md` 해시가 `tests/eval/profile_hash.txt`와 같아야 하며, intent / abstain / followup 게이트를 통과해야 합니다.
 
-`data/profile/bio.md`와 `projects.md`가 eval 기준입니다. 둘만 두고 `about.md` 같은 다른 마크다운은 넣지 마세요(로더가 `*.md` 전부 읽습니다).
+## 한계
 
-프로필을 고친 뒤에는 순서대로:
-
-1. `python scripts/ingest.py`로 Chroma 재적재
-2. `tests/eval/profile_hash.txt`를 새 SHA-256으로 갱신  
-   (`bio.md`+`projects.md` 바이트 해시; `scripts/eval_chat.py`가 불일치면 채점 전에 종료)
-3. `tests/eval/cases.json`의 `must_include` / unknown 케이스 재검토
-4. `python scripts/eval_chat.py` 실행 (실 OpenAI 키 필요)
-
-```bash
-python scripts/eval_chat.py
-```
-
-합격선(게이트):
-
-- Intent accuracy ≥ 90%
-- `must_not_include` 위반 = 0
-- unknown(abstain) 케이스 ≥ 80%
-- followup 케이스 ≥ 80%
-
-`must_include` 적중률은 리포트에만 남기고 첫 게이트에는 넣지 않습니다. 결과는 `tests/eval/report.json`에 쓰이며 gitignore합니다.
-
-## 알려진 한계
-
-최근 대화는 API로 넘기지만, 답은 검색된 프로필 조각 안에 있는 내용으로만 만듭니다. 검색이 빗나가면 이어 묻기도 부족하게 답할 수 있습니다.
+대화 history는 요청마다 넘기지만, 답은 검색된 프로필 조각 안의 내용으로만 만듭니다.
