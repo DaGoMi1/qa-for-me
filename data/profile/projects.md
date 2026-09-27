@@ -126,7 +126,7 @@ DeepFM으로 저차원·고차원 상호작용을 같이 학습하고, 임베딩
 - 역할: 전체 (프로필 RAG, LangGraph, FastAPI, Streamlit)
 - 한 줄: 나에 대한 질문에 프로필 근거만으로 답하는 개인 Q&A
 - 저장소: https://github.com/DaGoMi1/qa-for-me
-- 스택: Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI
+- 스택: Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI, Docker
 
 #### 풀려던 문제
 
@@ -146,8 +146,12 @@ API는 FastAPI다. GET /health는 프로세스 생존만 보고한다. POST /cha
 
 청킹은 LangChain RecursiveCharacterTextSplitter로 chunk_size 800, chunk_overlap 100이다. 구분자는 줄바꿈 뒤 ## / ### / #### 헤더를 우선하고, 그다음 빈 줄·줄·공백·문자다. 의미 단위(시맨틱) 청킹은 쓰지 않는다. 서버 기동 시 컬렉션이 비어 있을 때만 적재하고, 프로필을 고친 뒤에는 scripts/ingest.py로 강제 재적재한다.
 
+단위 테스트는 가짜 모델·임베딩으로 pytest한다. 품질 평가는 scripts/eval_chat.py와 tests/eval/cases.json이다. 게이트는 intent accuracy 90% 이상, must_not_include 위반 0, unknown(abstain) 80% 이상, followup 80% 이상이다. must_include 적중률은 리포트에만 남기고 첫 게이트에는 넣지 않는다. 결과는 tests/eval/report.json에 쓰며 gitignore한다.
+
 관측은 POST /chat마다 uvicorn.error 로거로 남긴다. intent, search_query, source(bio.md|projects.md), n_context, n_history, latency_ms, question_chars, answer_chars를 줄바꿈 key=value로 찍는다. 질문·답 전문은 넣지 않는다. httpx와 httpcore 로그는 WARNING으로 올려 OpenAI 호출 줄을 숨긴다.
+
+배포는 Docker Compose로 api(FastAPI)와 web(Streamlit)을 띄운다. 로컬과 AWS EC2에서 같은 compose를 쓴다. GitHub Actions CI는 push·PR마다 pytest를 돌리고, CD는 main 푸시 후 EC2에 SSH로 git pull과 compose 재빌드를 한다. 도메인·HTTPS·ECR 이미지 레지스트리는 아직 없다.
 
 #### 말하면 안 되는 것
 
-Docker Compose·Dockerfile·CI·공개 클라우드 배포가 있다고 말하면 안 된다. 로컬 FastAPI와 Streamlit이다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다. LangSmith를 붙였다고 말하면 안 된다. 관측은 uvicorn 콘솔 로그뿐이다다.
+도메인·HTTPS·로드밸런서·ECR/ECS가 있다고 말하면 안 된다. Compose와 EC2 SSH CD까지다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다. LangSmith를 붙였다고 말하면 안 된다. 관측은 uvicorn 콘솔 로그뿐이다다. Docker·CI가 없다고 말하면 안 된다. Dockerfile, docker-compose, GitHub Actions가 있다.
