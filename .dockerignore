@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+**/__pycache__
+*.py[cod]
+.pytest_cache
+*.egg-info
+dist
+build
+.env
+data/chroma
+tests
+.cursor
