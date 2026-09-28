@@ -4,6 +4,9 @@
 
 FastAPI가 `POST /chat`을 받고, LangGraph가 `prepare` → `retrieve`(bio|projects) → `generate` 순으로 검색·생성합니다. 벡터 저장소는 Chroma, 화면은 Streamlit입니다.
 
+**Demo:** [http://13.125.245.206:8501](http://13.125.245.206:8501)  
+(EC2 퍼블릭 IP는 인스턴스 재시작 시 바뀔 수 있습니다.)
+
 ## 구성
 
 | 경로 | 역할 |
@@ -16,7 +19,7 @@ FastAPI가 `POST /chat`을 받고, LangGraph가 `prepare` → `retrieve`(bio|pro
 | `scripts/` | 적재·eval |
 | `tests/` | pytest · gold eval |
 
-배포는 `Dockerfile` / `docker-compose.yml`로 API와 Streamlit을 함께 띄웁니다. GitHub Actions로 `pytest`(CI)와 `main` 푸시 시 EC2 Compose 재배포(CD)를 돌립니다.
+배포는 `Dockerfile` / `docker-compose.yml`로 API와 Streamlit을 로컬과 AWS EC2에 동일하게 띄웁니다. GitHub Actions로 `pytest`(CI)와 `main` 푸시 시 EC2에 SSH로 Compose 재배포(CD)를 돌립니다.
 
 ## 실행
 
@@ -68,4 +71,4 @@ pytest
 
 ## 한계
 
-대화 history는 요청마다 넘기지만, 답은 검색된 프로필 조각 안의 내용으로만 만듭니다.
+대화 history는 요청마다 넘기지만, 답은 검색된 프로필 조각 안의 내용으로만 만듭니다. 도메인·HTTPS는 없고, 데모는 EC2 퍼블릭 IP의 8501 포트로 접속합니다.
