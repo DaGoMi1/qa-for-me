@@ -2,7 +2,7 @@
 
 ## Confident project
 
-가장 자신 있는 프로젝트는 qa-for-me다. 나에 대한 Q&A를 위해 프로필 로더, 청크, Chroma 적재, LangGraph의 prepare → retrieve(bio|projects) → generate, 대화 history, 품질 가드, uvicorn 로그까지 직접 이어 붙인 개인 프로젝트이기 때문이다. Cursor를 쓰되 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
+가장 자신 있는 프로젝트는 qa-for-me다. 나에 대한 Q&A를 위해 프로필 로더, 청크, Chroma 적재, LangGraph의 prepare → retrieve(bio|projects) → generate, 대화 history, 품질 가드, uvicorn 로그, Docker Compose와 AWS EC2 배포, GitHub Actions CI/CD까지 직접 이어 붙인 개인 프로젝트이기 때문이다. Cursor를 쓰되 코드를 이해하고 의도대로 고칠 수 있을 때만 다음 단계로 진행하는 방식으로 만들고 있다.
 
 ## Project
 
@@ -123,10 +123,10 @@ DeepFM으로 저차원·고차원 상호작용을 같이 학습하고, 임베딩
 
 - 기간: 2026.09~진행 중
 - 형태: 솔로
-- 역할: 전체 (프로필 RAG, LangGraph, FastAPI, Streamlit)
+- 역할: 전체 (프로필 RAG, LangGraph, FastAPI, Streamlit, Docker, AWS EC2 배포)
 - 한 줄: 나에 대한 질문에 프로필 근거만으로 답하는 개인 Q&A
 - 저장소: https://github.com/DaGoMi1/qa-for-me
-- 스택: Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI, Docker
+- 스택: Python, FastAPI, Streamlit, LangChain, LangGraph, Chroma, OpenAI, Docker, AWS EC2
 
 #### 풀려던 문제
 
@@ -150,8 +150,8 @@ API는 FastAPI다. GET /health는 프로세스 생존만 보고한다. POST /cha
 
 관측은 POST /chat마다 uvicorn.error 로거로 남긴다. intent, search_query, source(bio.md|projects.md), n_context, n_history, latency_ms, question_chars, answer_chars를 줄바꿈 key=value로 찍는다. 질문·답 전문은 넣지 않는다. httpx와 httpcore 로그는 WARNING으로 올려 OpenAI 호출 줄을 숨긴다.
 
-배포는 Docker Compose로 api(FastAPI)와 web(Streamlit)을 띄운다. 로컬과 AWS EC2에서 같은 compose를 쓴다. GitHub Actions CI는 push·PR마다 pytest를 돌리고, CD는 main 푸시 후 EC2에 SSH로 git pull과 compose 재빌드를 한다. 도메인·HTTPS·ECR 이미지 레지스트리는 아직 없다.
+배포는 Docker Compose로 api(FastAPI)와 web(Streamlit)을 띄운다. 로컬과 동일한 compose로 AWS EC2(Ubuntu)에 올렸다. GitHub Actions CI는 push·PR마다 pytest를 돌리고, CD는 main 푸시 후 EC2에 SSH로 git pull과 compose 재빌드를 한다. 데모는 EC2 퍼블릭 IP의 8501 포트로 접속한다. 도메인·HTTPS·ECR 이미지 레지스트리는 없다.
 
 #### 말하면 안 되는 것
 
-도메인·HTTPS·로드밸런서·ECR/ECS가 있다고 말하면 안 된다. Compose와 EC2 SSH CD까지다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다. LangSmith를 붙였다고 말하면 안 된다. 관측은 uvicorn 콘솔 로그뿐이다다. Docker·CI가 없다고 말하면 안 된다. Dockerfile, docker-compose, GitHub Actions가 있다.
+도메인·HTTPS·로드밸런서·ECR/ECS가 있다고 말하면 안 된다. Docker Compose와 AWS EC2 배포, GitHub Actions CI/CD(SSH)까지다. 벤치마크·리더보드 점수가 있다고 말하면 안 된다. 팀 프로젝트라고 말하면 안 된다. 혼자 만든다. 프로필에 없는 학력·연락처·다른 사람 풀네임을 지어 말하면 안 된다. rewrite와 classify가 따로 있다고 말하면 안 된다. prepare 한 노드다. 시맨틱 청킹이나 문장 단위로 의미를 묶어 청킹한다고 말하면 안 된다. LangSmith를 붙였다고 말하면 안 된다. 관측은 uvicorn 콘솔 로그뿐이다다. Docker·EC2·CI/CD가 없다고 말하면 안 된다. Dockerfile, docker-compose, AWS EC2, GitHub Actions가 있다.
